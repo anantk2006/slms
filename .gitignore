@@ -1,0 +1,8 @@
+data/*
+logs/*
+checkpoints/*
+*.pyc
+__pycache__/
+.DS_Store
+.env
+.vscode/
