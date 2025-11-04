@@ -1,18 +1,28 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 import torch.nn as nn
-import torch.optim as optim
 
-MODEL_ID = "google/gemma-3-1b-pt"
+from train import train_taid
+from dataset import get_dataloader
 
-tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
-model = AutoModelForCausalLM.from_pretrained(MODEL_ID)
+
+STUDENT_MODEL_ID = "google/gemma-3-1b-pt"
+TEACHER_MODEL_ID = "google/gemma-7b"
+
+tokenizer = AutoTokenizer.from_pretrained(STUDENT_MODEL_ID)
+student_model = AutoModelForCausalLM.from_pretrained(STUDENT_MODEL_ID)
+teacher_model = AutoModelForCausalLM.from_pretrained(TEACHER_MODEL_ID)
+
+dataloader = get_dataloader(batch_size=4, context_size=1024)
 
 if torch.cuda.is_available():
-    model = AutoModelForCausalLM.from_pretrained(MODEL_ID, torch_dtype=torch.float16, device_map="auto")
+    student_model = student_model.to("cuda")
+    teacher_model = teacher_model.to("cuda")
+    train_taid(teacher_model, student_model, tokenizer, dataloader, epochs=3, lr=1e-4, beta=0.9, alpha=0.1)
 else:
-    model = AutoModelForCausalLM.from_pretrained(MODEL_ID)
-    model.to(torch.device("cpu"))
+    raise EnvironmentError("CUDA is not available. Please run on a machine with a GPU.")
+
+
 
 
 
