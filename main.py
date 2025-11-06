@@ -1,5 +1,6 @@
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
+from peft import LoraConfig, get_peft_model
 import torch.nn as nn
 
 from train import train_taid
@@ -11,6 +12,17 @@ TEACHER_MODEL_ID = "google/gemma-7b"
 
 tokenizer = AutoTokenizer.from_pretrained(STUDENT_MODEL_ID)
 student_model = AutoModelForCausalLM.from_pretrained(STUDENT_MODEL_ID)
+
+lora_config = LoraConfig(
+    r=8,
+    lora_alpha=32,
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    lora_dropout=0.05,
+    bias="none",
+    task_type="CAUSAL_LM"
+)
+student_model = get_peft_model(student_model, lora_config)
+
 teacher_model = AutoModelForCausalLM.from_pretrained(TEACHER_MODEL_ID)
 
 dataloader = get_dataloader(batch_size=4, context_size=1024)

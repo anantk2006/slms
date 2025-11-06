@@ -24,7 +24,8 @@ def train_taid(teacher_model, student_model, tokenizer, dataloader, epochs, lr, 
     
     t = torch.tensor(0)
     optimizer = torch.optim.SGD(student_model.parameters(), lr=lr, momentum=0.9)
-    for epoch in epochs:
+    step = 0
+    for epoch in range(epochs):
         for seqs in dataloader:
             optimizer.zero_grad()
             inputs = tokenizer(seqs, return_tensors="pt", padding=True, truncation=True)

@@ -18,9 +18,8 @@ class RawTextDataset(Dataset):
         return len(self.words) - self.context_size
 
     def __getitem__(self, idx):
-        x = self.words[idx:idx+self.context_size]      # raw text
-        y = self.words[idx+1:idx+self.context_size+1]  # next word prediction
-        return x, y
+        x = " ".join(self.words[idx:idx+self.context_size])
+        return x
     
 def get_dataloader(batch_size=8, context_size=1024):
     dataset = RawTextDataset(corpus_words, context_size=context_size)
